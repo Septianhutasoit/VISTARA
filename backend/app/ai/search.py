@@ -12,7 +12,11 @@ class SearchService:
     def initialize_with_destinations(self, destinations: List[dict]):
         """Initialize FAISS index with destination embeddings"""
         print(f"🔄 Initializing search service with {len(destinations)} destinations...")
+        
+        # RESET DATA LAMA AGAR TIDAK DUPLIKAT
         self.destinations = destinations
+        self.faiss_index.create_index() 
+        self.faiss_index.metadata = [] 
         
         # Generate embeddings for all destinations
         embeddings = self.embedding_manager.encode_destinations(destinations)

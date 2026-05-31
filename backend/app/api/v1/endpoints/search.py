@@ -8,9 +8,14 @@ router = APIRouter()
 def load_data_from_datasets():
     """Menggabungkan semua data dari folder dataset"""
     combined_data = []
-    # Path menuju folder dataset (naik satu level dari folder backend)
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    dataset_dir = os.path.join(base_dir, "dataset")
+    
+    # Navigasi ke Project Root (E:\Projects\cultour)
+    current_file_path = os.path.abspath(__file__)
+    project_root = os.path.dirname(current_file_path) # endpoints
+    for _ in range(5):
+        project_root = os.path.dirname(project_root)
+    
+    dataset_dir = os.path.join(project_root, "dataset")
     
     files = {
         "destinations.csv": "Wisata",
@@ -19,36 +24,43 @@ def load_data_from_datasets():
         "events.csv": "Event"
     }
 
+    print(f"📂 Lokasi Project Root: {project_root}")
     print(f"📂 Mencari dataset di: {dataset_dir}")
 
     for file_name, cat in files.items():
-        path = os.path.join(dataset_dir, file_name)
-        if os.path.exists(path):
+        # VARIABEL 'path' DIDEFINISIKAN DI SINI
+        file_path = os.path.join(dataset_dir, file_name)
+        
+        if os.path.exists(file_path):
             try:
-                # Baca CSV (pastikan encoding utf-8 atau latin-1)
-                df = pd.read_csv(path, encoding='utf-8')
-                # Tambahkan kolom category jika belum ada
+                # Membaca CSV dengan proteksi tanda kutip (quotechar)
+                df = pd.read_csv(file_path, encoding='utf-8', quotechar='"', skipinitialspace=True)
+                df.columns = df.columns.str.strip()
                 df['category'] = cat
-                # Ubah ke list of dictionary
+                df = df.fillna("")
+                
                 items = df.to_dict('records')
                 combined_data.extend(items)
-                print(f"✅ Loaded {len(items)} items from {file_name}")
+                print(f"✅ Berhasil memuat {len(items)} data dari {file_name}")
             except Exception as e:
-                print(f"❌ Error reading {file_name}: {e}")
+                print(f"❌ Gagal membaca {file_name}: {e}")
         else:
-            print(f"⚠️ File tidak ditemukan: {path}")
+            print(f"⚠️ File TIDAK ditemukan di: {file_path}")
     
     return combined_data
 
 # Inisialisasi AI dengan data CSV saat startup
 @router.on_event("startup")
 async def startup_event():
-    data = load_data_from_datasets()
-    if data:
-        search_service.initialize_with_destinations(data)
-        print(f"🚀 AI Search Ready dengan {len(data)} data asli!")
-    else:
-        print("⚠️ Gagal memuat data. Periksa folder dataset Anda.")
+    try:
+        data = load_data_from_datasets()
+        if data:
+            search_service.initialize_with_destinations(data)
+            print(f"🚀 AI Search Ready dengan {len(data)} data asli!")
+        else:
+            print("⚠️ Gagal memuat data. Periksa folder dataset Anda.")
+    except Exception as e:
+        print(f"❌ Terjadi kesalahan saat startup: {e}")
 
 @router.get("/search")
 async def semantic_search(
