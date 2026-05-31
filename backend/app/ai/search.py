@@ -1,68 +1,59 @@
-import faiss
-import numpy as np
-import pickle
-import os
-from typing import List, Tuple
-from app.core.config import settings
+from typing import List, Dict, Any
+from app.ai.embeddings import EmbeddingManager
+from app.ai.faiss_index import FAISSIndex
 
-class FAISSIndex:
-    def __init__(self, dimension: int = 384):
-        self.dimension = dimension
-        self.index = None
-        self.metadata = []  # Store destination IDs
-        self.load_or_create_index()
+class SearchService:
+    def __init__(self):
+        self.embedding_manager = EmbeddingManager()
+        self.faiss_index = FAISSIndex(dimension=384)
+        self.destinations = []
+        self.is_ready = False
     
-    def load_or_create_index(self):
-        """Load existing index or create new one"""
-        if os.path.exists(settings.FAISS_INDEX_PATH):
-            print(f"Loading existing FAISS index from {settings.FAISS_INDEX_PATH}")
-            self.index = faiss.read_index(settings.FAISS_INDEX_PATH)
-            # Load metadata
-            metadata_path = settings.FAISS_INDEX_PATH.replace('.bin', '_metadata.pkl')
-            if os.path.exists(metadata_path):
-                with open(metadata_path, 'rb') as f:
-                    self.metadata = pickle.load(f)
-        else:
-            print("Creating new FAISS index")
-            self.index = faiss.IndexFlatL2(self.dimension)
-    
-    def add_embeddings(self, embeddings: np.ndarray, metadata_ids: List[int]):
-        """Add embeddings to index"""
-        if embeddings.shape[1] != self.dimension:
-            raise ValueError(f"Expected dimension {self.dimension}, got {embeddings.shape[1]}")
+    def initialize_with_destinations(self, destinations: List[dict]):
+        """Initialize FAISS index with destination embeddings"""
+        print(f"🔄 Initializing search service with {len(destinations)} destinations...")
+        self.destinations = destinations
         
-        self.index.add(embeddings)
-        self.metadata.extend(metadata_ids)
-        self.save()
+        # Generate embeddings for all destinations
+        embeddings = self.embedding_manager.encode_destinations(destinations)
+        
+        # Add to FAISS index
+        self.faiss_index.add_embeddings(embeddings, destinations)
+        self.is_ready = True
+        print(f"✅ Search service ready! Index size: {self.faiss_index.index.ntotal}")
     
-    def search(self, query_embedding: np.ndarray, k: int = 10) -> List[Tuple[int, float]]:
-        """Search similar embeddings"""
-        if self.index.ntotal == 0:
+    async def search(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Search similar destinations using semantic search"""
+        if not self.is_ready:
             return []
         
-        distances, indices = self.index.search(query_embedding, k)
+        # Generate query embedding
+        query_embedding = self.embedding_manager.encode_single(query)
         
-        results = []
-        for idx, distance in zip(indices[0], distances[0]):
-            if idx != -1 and idx < len(self.metadata):
-                results.append((self.metadata[idx], float(distance)))
+        # Search in FAISS
+        results = self.faiss_index.search(query_embedding, limit)
         
-        return results
+        # Format results
+        formatted_results = []
+        for dest, distance in results:
+            # Convert distance to similarity score (closer distance = higher similarity)
+            similarity = 1.0 / (1.0 + distance)
+            formatted_results.append({
+                "destination": dest,
+                "similarity_score": round(similarity, 4),
+                "distance": round(distance, 4)
+            })
+        
+        return formatted_results
     
-    def save(self):
-        """Save index and metadata to disk"""
-        faiss.write_index(self.index, settings.FAISS_INDEX_PATH)
-        metadata_path = settings.FAISS_INDEX_PATH.replace('.bin', '_metadata.pkl')
-        with open(metadata_path, 'wb') as f:
-            pickle.dump(self.metadata, f)
-        print(f"Saved FAISS index with {self.index.ntotal} vectors")
-    
-    def rebuild_from_database(self, db, embedding_manager):
-        """Rebuild index from database"""
-        # Clear existing
-        self.index = faiss.IndexFlatL2(self.dimension)
-        self.metadata = []
-        
-        # Fetch all destinations from DB
-        # This will be implemented when DB is ready
-        pass
+    def get_status(self) -> dict:
+        """Get service status"""
+        return {
+            "is_ready": self.is_ready,
+            "model_loaded": self.embedding_manager.model is not None,
+            "index_size": self.faiss_index.index.ntotal if self.faiss_index.index else 0,
+            "model_name": self.embedding_manager.model_name
+        }
+
+# Global instance
+search_service = SearchService()
