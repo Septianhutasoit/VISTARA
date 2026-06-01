@@ -11,8 +11,14 @@ class EmbeddingManager:
     def load_model(self):
         """Load Sentence Transformer model"""
         print(f"🔄 Loading model: {self.model_name}")
-        self.model = SentenceTransformer(self.model_name)
-        # Menggunakan method baru 'get_embedding_dimension' untuk menghindari warning
+        try:
+            # Mencoba load normal (dengan cek internet singkat)
+            self.model = SentenceTransformer(self.model_name)
+        except Exception as e:
+            print(f"⚠️ Gagal koneksi internet, mencoba mode offline... {e}")
+            # Jika gagal (offline), paksa gunakan file yang sudah ada di komputer
+            self.model = SentenceTransformer(self.model_name, local_files_only=True)
+            
         print(f"✅ Model loaded successfully! Dimension: {self.model.get_embedding_dimension()}")
     
     def encode(self, texts: List[str]) -> np.ndarray:
