@@ -72,7 +72,6 @@ CulTour hadir dengan pendekatan **AI-First** yang mengubah cara wisatawan menemu
 | 🧠 **Vector Embeddings** | FAISS + PyTorch | Representasi cerdas destinasi |
 | 🎯 **RAG Pipeline** | Hugging Face + Transformers | Generasi rekomendasi akurat |
 | ⚡ **Real-time** | FastAPI + Uvicorn | Respons cepat & interaktif |
-
 </div>
 
 ---
