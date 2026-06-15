@@ -1,23 +1,25 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "../components/Navbar";
 import ChatWidget from "../components/ChatWidget";
 
 export const metadata: Metadata = {
-    title: "CulTour AI — Wisata Budaya Danau Toba",
-    description: "AI-Powered Cultural Tourism Assistant untuk kawasan Danau Toba",
+    title: "CulTour AI — Jelajahi Danau Toba",
+    description: "Asisten Wisata Budaya Berbasis AI",
 };
 
-export default function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="id">
-            <body className="bg-[#07090a] text-white antialiased min-h-screen overflow-x-hidden">
+            <body className="bg-[#07090a] text-white antialiased selection:bg-emerald-500/30">
+                {/* Navbar Global */}
                 <Navbar />
-                <main className="relative z-10">{children}</main>
+
+                {/* Konten Halaman */}
+                <main>{children}</main>
+
+                {/* Chatbot Melayang */}
                 <ChatWidget />
             </body>
         </html>
