@@ -1,29 +1,23 @@
-import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
-import './globals.css';
-import Navbar from '../components/Navbar';
-import ChatWidget from '../components/ChatWidget';
-
-const geist = Geist({ subsets: ['latin'] });
+import type { Metadata } from "next";
+import "./globals.css";
+import Navbar from "../components/Navbar";
+import ChatWidget from "../components/ChatWidget";
 
 export const metadata: Metadata = {
-    title: 'CulTour — Wisata Budaya Danau Toba',
-    description: 'Platform wisata budaya cerdas berbasis AI untuk kawasan Danau Toba',
-    keywords: ['Danau Toba', 'wisata budaya', 'Batak', 'AI tourism'],
+    title: "CulTour AI — Wisata Budaya Danau Toba",
+    description: "AI-Powered Cultural Tourism Assistant untuk kawasan Danau Toba",
 };
 
-// Halaman yang pakai full-bleed hero (navbar transparan di atas konten)
-const HERO_PAGES = ['/', '/explore', '/ai', '/culturepedia', '/planner'];
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <html lang="id">
-            <body className={`${geist.className} bg-[#0a0a0a] min-h-screen overflow-x-clip`}>
+            <body className="bg-[#07090a] text-white antialiased min-h-screen overflow-x-hidden">
                 <Navbar />
-                <main>
-                    {children}
-                </main>
-                {/* Floating AI chat bubble — muncul di semua halaman */}
+                <main className="relative z-10">{children}</main>
                 <ChatWidget />
             </body>
         </html>

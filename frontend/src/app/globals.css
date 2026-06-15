@@ -3,12 +3,45 @@
 @tailwind utilities;
 
 :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --bg-primary: #07090a;
+    --bg-card: #0e1210;
+    --accent: #22c55e;
+    --accent-dim: #15803d;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
-    background-color: #121212;
-    color: white;
+    background-color: #07090a;
+    color: #f1f5f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+::selection {
+    background: rgba(34, 197, 94, 0.2);
+    color: #f1f5f2;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: #07090a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #166534;
+    border-radius: 10px;
 }
