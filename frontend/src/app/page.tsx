@@ -12,8 +12,6 @@ const fadeUp = (delay = 0) => ({
     animate: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] } },
 });
 
-const stagger = { initial: {}, animate: { transition: { staggerChildren: 0.1 } } };
-
 const STATS = [
     { label: "Destinasi Terverifikasi", val: "48+", Icon: Compass, color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
     { label: "Kategori Budaya", val: "12", Icon: Users, color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20" },
@@ -35,98 +33,125 @@ const DESTINATIONS = [
 
 export default function Home() {
     return (
-        <div className="min-h-screen bg-[#07090a] text-white">
+        <div style={{ minHeight: "100vh", backgroundColor: "#07090a", color: "white" }}>
 
-            {/* ══ HERO — pt-28 memberi ruang untuk Navbar fixed top-6 ══ */}
-            <section className="relative pt-28 pb-24 px-6 overflow-hidden">
-                {/* Glow — z-0, konten di z-10 */}
-                <div className="pointer-events-none absolute inset-0 z-0">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-emerald-600/6 rounded-full blur-[160px]" />
-                    <div className="absolute top-32 right-0 w-[400px] h-[400px] bg-teal-500/4 rounded-full blur-[120px]" />
+            {/* ══ HERO ══ */}
+            <section style={{ position: "relative", paddingTop: "120px", paddingBottom: "96px", overflow: "hidden" }}>
+                {/* Glow */}
+                <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+                    <div style={{
+                        position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+                        width: "800px", height: "500px",
+                        background: "radial-gradient(ellipse, rgba(16,185,129,0.07) 0%, transparent 70%)",
+                        filter: "blur(60px)"
+                    }} />
                 </div>
 
-                <div className="relative z-10 max-w-5xl mx-auto text-center">
-                    <motion.div variants={stagger} initial="initial" animate="animate">
+                <div style={{ position: "relative", zIndex: 10, maxWidth: "800px", margin: "0 auto", padding: "0 24px", textAlign: "center" }}>
 
-                        {/* Badge */}
-                        <motion.div {...fadeUp(0)} className="flex justify-center mb-8">
-                            <span className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-5 py-2 rounded-full text-xs font-bold tracking-widest uppercase backdrop-blur-md">
-                                <Sparkles size={12} className="animate-pulse" />
-                                AI-Powered Cultural Experience
-                            </span>
-                        </motion.div>
+                    {/* Badge */}
+                    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+                        style={{ display: "flex", justifyContent: "center", marginBottom: "32px" }}>
+                        <span style={{
+                            display: "inline-flex", alignItems: "center", gap: "8px",
+                            background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)",
+                            color: "#34d399", padding: "8px 20px", borderRadius: "999px",
+                            fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase"
+                        }}>
+                            <Sparkles size={12} style={{ animation: "pulse 2s infinite" }} />
+                            AI-Powered Cultural Experience
+                        </span>
+                    </motion.div>
 
-                        {/* Headline */}
-                        <motion.h1
-                            {...fadeUp(0.1)}
-                            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] mb-7"
+                    {/* Headline */}
+                    <motion.h1 {...fadeUp(0.1)} style={{
+                        fontSize: "clamp(2.8rem, 7vw, 5.5rem)", fontWeight: 900,
+                        letterSpacing: "-0.03em", lineHeight: 1, marginBottom: "24px"
+                    }}>
+                        Jelajahi Danau Toba
+                        <br />
+                        <span style={{
+                            background: "linear-gradient(90deg, #34d399, #86efac, #2dd4bf)",
+                            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent"
+                        }}>
+                            dengan Personal AI
+                        </span>
+                    </motion.h1>
+
+                    {/* Subtitle */}
+                    <motion.p {...fadeUp(0.2)} style={{
+                        color: "#9ca3af", fontSize: "1.125rem", lineHeight: 1.7,
+                        maxWidth: "560px", margin: "0 auto 40px"
+                    }}>
+                        Temukan kekayaan budaya Batak, kuliner autentik, dan rencana
+                        perjalanan cerdas yang disesuaikan khusus untuk Anda.
+                    </motion.p>
+
+                    {/* CTA Buttons */}
+                    <motion.div {...fadeUp(0.3)} style={{ display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap", marginBottom: "48px" }}>
+                        <Link href="/planner" style={{
+                            display: "inline-flex", alignItems: "center", gap: "10px",
+                            background: "#059669", color: "white", fontWeight: 800,
+                            padding: "14px 32px", borderRadius: "16px", fontSize: "15px",
+                            textDecoration: "none", transition: "background 0.2s",
+                            boxShadow: "0 20px 40px rgba(5,150,105,0.3)"
+                        }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "#10b981")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "#059669")}
                         >
-                            Jelajahi Danau Toba
-                            <br />
-                            <span className="bg-gradient-to-r from-emerald-400 via-green-300 to-teal-400 bg-clip-text text-transparent">
-                                dengan Personal AI
-                            </span>
-                        </motion.h1>
-
-                        {/* Subtitle */}
-                        <motion.p
-                            {...fadeUp(0.2)}
-                            className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-10"
+                            Rencanakan Trip <ArrowRight size={18} />
+                        </Link>
+                        <Link href="/explore" style={{
+                            display: "inline-flex", alignItems: "center", gap: "10px",
+                            background: "rgba(255,255,255,0.05)", color: "white", fontWeight: 600,
+                            padding: "14px 32px", borderRadius: "16px", fontSize: "15px",
+                            textDecoration: "none", border: "1px solid rgba(255,255,255,0.1)",
+                            transition: "background 0.2s"
+                        }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
                         >
-                            Temukan kekayaan budaya Batak, kuliner autentik, dan rencana
-                            perjalanan cerdas yang disesuaikan khusus untuk Anda.
-                        </motion.p>
+                            Jelajahi Destinasi
+                        </Link>
+                    </motion.div>
 
-                        {/* CTA */}
-                        <motion.div {...fadeUp(0.3)} className="flex flex-wrap justify-center gap-4 mb-14">
-                            <Link
-                                href="/planner"
-                                className="group inline-flex items-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-4 rounded-2xl text-base transition-all duration-200 shadow-xl shadow-emerald-900/50 active:scale-95"
-                            >
-                                Rencanakan Trip
-                                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                            <Link
-                                href="/explore"
-                                className="inline-flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-4 rounded-2xl text-base transition-all duration-200 backdrop-blur-md"
-                            >
-                                Jelajahi Destinasi
-                            </Link>
-                        </motion.div>
-
-                        {/* Pills */}
-                        <motion.div {...fadeUp(0.4)} className="flex flex-wrap justify-center gap-2">
-                            {["48+ Destinasi Wisata", "AI Trip Planner", "Budaya Batak", "Kuliner Lokal", "Real-time Chat"].map((pill) => (
-                                <span key={pill} className="text-xs text-gray-500 bg-white/5 border border-white/8 px-4 py-2 rounded-full font-medium">
-                                    {pill}
-                                </span>
-                            ))}
-                        </motion.div>
-
+                    {/* Pills */}
+                    <motion.div {...fadeUp(0.4)} style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
+                        {["48+ Destinasi Wisata", "AI Trip Planner", "Budaya Batak", "Kuliner Lokal", "Real-time Chat"].map((pill) => (
+                            <span key={pill} style={{
+                                fontSize: "11px", color: "#6b7280",
+                                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                                padding: "6px 14px", borderRadius: "999px", fontWeight: 500
+                            }}>{pill}</span>
+                        ))}
                     </motion.div>
                 </div>
             </section>
 
-            {/* ══ STATS ══════════════════════════════════════════════ */}
-            <section className="px-6 max-w-5xl mx-auto mb-24">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* ══ STATS ══ */}
+            <section style={{ padding: "0 24px 96px", maxWidth: "960px", margin: "0 auto" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "20px" }}>
                     {STATS.map((s, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 24 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.08 }}
+                        <motion.div key={i}
+                            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }}
                             whileHover={{ y: -5 }}
-                            className={`group bg-[#0e1210] border ${s.border} hover:border-emerald-500/30 rounded-3xl p-9 transition-all duration-200`}
+                            style={{
+                                background: "#0e1210", borderRadius: "24px", padding: "36px",
+                                border: "1px solid rgba(255,255,255,0.06)", transition: "all 0.2s"
+                            }}
                         >
-                            <div className={`w-11 h-11 ${s.bg} border ${s.border} rounded-2xl flex items-center justify-center mb-6`}>
+                            <div style={{
+                                width: "44px", height: "44px", borderRadius: "14px",
+                                background: "rgba(255,255,255,0.05)", display: "flex",
+                                alignItems: "center", justifyContent: "center", marginBottom: "24px"
+                            }}>
                                 <s.Icon size={20} className={s.color} />
                             </div>
-                            <div className="text-5xl font-black text-white mb-2 tracking-tighter group-hover:text-emerald-400 transition-colors">
+                            <div className={s.color} style={{ fontSize: "3rem", fontWeight: 900, letterSpacing: "-0.04em", marginBottom: "6px" }}>
                                 {s.val}
                             </div>
-                            <div className="text-gray-500 text-xs uppercase tracking-widest font-bold">
+                            <div style={{ color: "#6b7280", fontSize: "11px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase" }}>
                                 {s.label}
                             </div>
                         </motion.div>
@@ -134,86 +159,105 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ══ FEATURES ═══════════════════════════════════════════ */}
-            <section className="px-6 max-w-5xl mx-auto mb-24">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                    className="mb-12"
-                >
-                    <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-3">Fitur Unggulan</p>
-                    <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white">Semua yang kamu butuhkan</h2>
+            {/* ══ FEATURES ══ */}
+            <section style={{ padding: "0 24px 96px", maxWidth: "960px", margin: "0 auto" }}>
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.5 }}
+                    style={{ marginBottom: "48px" }}>
+                    <p style={{ fontSize: "11px", fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: "12px" }}>
+                        Fitur Unggulan
+                    </p>
+                    <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 900, letterSpacing: "-0.02em", color: "white" }}>
+                        Semua yang kamu butuhkan
+                    </h2>
                 </motion.div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "20px" }}>
                     {FEATURES.map((f, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 24 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                        <motion.div key={i}
+                            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
                             whileHover={{ y: -4 }}
-                            className="bg-[#0e1210] border border-white/5 hover:border-white/10 rounded-3xl p-7 transition-all duration-200"
+                            style={{
+                                background: "#0e1210", borderRadius: "24px", padding: "28px",
+                                border: "1px solid rgba(255,255,255,0.05)", transition: "all 0.2s"
+                            }}
                         >
-                            <div className={`w-11 h-11 ${f.bg} rounded-2xl flex items-center justify-center mb-5`}>
+                            <div style={{
+                                width: "44px", height: "44px", borderRadius: "14px",
+                                background: "rgba(255,255,255,0.05)", display: "flex",
+                                alignItems: "center", justifyContent: "center", marginBottom: "20px"
+                            }}>
                                 <f.Icon size={20} className={f.color} />
                             </div>
-                            <h3 className="font-bold text-white text-lg mb-3 tracking-tight">{f.title}</h3>
-                            <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+                            <h3 style={{ fontWeight: 700, color: "white", fontSize: "1.1rem", marginBottom: "10px", letterSpacing: "-0.01em" }}>
+                                {f.title}
+                            </h3>
+                            <p style={{ color: "#6b7280", fontSize: "0.875rem", lineHeight: 1.7 }}>{f.desc}</p>
                         </motion.div>
                     ))}
                 </div>
             </section>
 
-            {/* ══ DESTINATIONS ═══════════════════════════════════════ */}
-            <section className="px-6 max-w-5xl mx-auto mb-24">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                    className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-5 mb-10"
-                >
+            {/* ══ DESTINATIONS ══ */}
+            <section style={{ padding: "0 24px 96px", maxWidth: "960px", margin: "0 auto" }}>
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.5 }}
+                    style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px", flexWrap: "wrap", gap: "16px" }}>
                     <div>
-                        <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-3">Destinasi Pilihan</p>
-                        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-2">Unggulan AI CulTour</h2>
-                        <p className="text-gray-500 text-sm">Rekomendasi terbaik berdasarkan analisis AI</p>
+                        <p style={{ fontSize: "11px", fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: "10px" }}>
+                            Destinasi Pilihan
+                        </p>
+                        <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 900, letterSpacing: "-0.02em", color: "white", marginBottom: "6px" }}>
+                            Unggulan AI CulTour
+                        </h2>
+                        <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>Rekomendasi terbaik berdasarkan analisis AI</p>
                     </div>
-                    <Link href="/explore" className="group flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-bold text-sm transition-colors">
-                        Lihat Semua
-                        <ChevronRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
+                    <Link href="/explore" style={{
+                        display: "inline-flex", alignItems: "center", gap: "6px",
+                        color: "#34d399", fontWeight: 700, fontSize: "0.875rem",
+                        textDecoration: "none", transition: "color 0.2s"
+                    }}>
+                        Lihat Semua <ChevronRight size={15} />
                     </Link>
                 </motion.div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}>
                     {DESTINATIONS.map((dest, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 24 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.08 }}
+                        <motion.div key={i}
+                            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.08 }}
                             whileHover={{ y: -8 }}
-                            className="group bg-[#0e1210] border border-white/5 hover:border-emerald-500/20 rounded-3xl overflow-hidden transition-all duration-200 cursor-pointer"
+                            style={{
+                                background: "#0e1210", borderRadius: "24px", overflow: "hidden",
+                                border: "1px solid rgba(255,255,255,0.05)", cursor: "pointer",
+                                transition: "all 0.2s"
+                            }}
                         >
-                            <div className="bg-gradient-to-br from-[#1a3020] to-[#0a100c] aspect-[4/3] flex items-center justify-center text-5xl group-hover:scale-105 transition-transform duration-500">
+                            <div style={{
+                                background: "linear-gradient(135deg, #1a3020, #0a100c)",
+                                aspectRatio: "4/3", display: "flex", alignItems: "center",
+                                justifyContent: "center", fontSize: "3rem"
+                            }}>
                                 {dest.icon}
                             </div>
-                            <div className="p-5">
-                                <div className="flex justify-between items-center mb-3">
-                                    <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border ${dest.catColor}`}>
+                            <div style={{ padding: "20px" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                                    <span className={dest.catColor} style={{
+                                        fontSize: "10px", fontWeight: 800, padding: "4px 10px",
+                                        borderRadius: "8px", textTransform: "uppercase", letterSpacing: "0.1em",
+                                        border: "1px solid currentColor"
+                                    }}>
                                         {dest.cat}
                                     </span>
-                                    <div className="flex items-center gap-1 text-amber-400 text-xs font-black">
+                                    <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#fbbf24", fontSize: "12px", fontWeight: 800 }}>
                                         <Star size={11} fill="currentColor" /> {dest.rate}
                                     </div>
                                 </div>
-                                <h4 className="font-bold text-white text-base mb-1.5 group-hover:text-emerald-400 transition-colors tracking-tight leading-tight">
+                                <h4 style={{ fontWeight: 700, color: "white", fontSize: "1rem", marginBottom: "6px", lineHeight: 1.3 }}>
                                     {dest.name}
                                 </h4>
-                                <p className="text-gray-500 text-xs flex items-center gap-1.5 font-medium">
-                                    <MapPin size={11} className="text-emerald-700 shrink-0" />
+                                <p style={{ color: "#6b7280", fontSize: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
+                                    <MapPin size={11} style={{ color: "#065f46", flexShrink: 0 }} />
                                     {dest.loc}
                                 </p>
                             </div>
@@ -222,52 +266,72 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ══ CTA BANNER ════════════════════════════════════════ */}
-            <section className="px-6 max-w-5xl mx-auto pb-28">
-                <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="relative rounded-3xl bg-gradient-to-br from-emerald-900/25 via-[#0e1512] to-[#07090a] border border-emerald-800/20 p-10 md:p-16 text-center overflow-hidden"
-                >
-                    <div className="pointer-events-none absolute inset-0 z-0">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] bg-emerald-600/10 rounded-full blur-[80px]" />
-                    </div>
-                    <div className="relative z-10 max-w-xl mx-auto">
-                        <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-4">Mulai Sekarang</p>
-                        <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-5 leading-tight">
-                            Siap merencanakan{" "}
-                            <span className="text-emerald-400">trip impianmu?</span>
+            {/* ══ CTA ══ */}
+            <section style={{ padding: "0 24px 112px", maxWidth: "960px", margin: "0 auto" }}>
+                <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }} transition={{ duration: 0.6 }}
+                    style={{
+                        position: "relative", borderRadius: "28px", overflow: "hidden",
+                        background: "linear-gradient(135deg, rgba(6,78,59,0.3), #0e1512, #07090a)",
+                        border: "1px solid rgba(5,150,105,0.2)", padding: "64px 40px", textAlign: "center"
+                    }}>
+                    <div style={{
+                        position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)",
+                        width: "400px", height: "150px", pointerEvents: "none",
+                        background: "radial-gradient(ellipse, rgba(16,185,129,0.1) 0%, transparent 70%)",
+                        filter: "blur(40px)"
+                    }} />
+                    <div style={{ position: "relative", zIndex: 10, maxWidth: "500px", margin: "0 auto" }}>
+                        <p style={{ fontSize: "11px", fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: "16px" }}>
+                            Mulai Sekarang
+                        </p>
+                        <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 3rem)", fontWeight: 900, letterSpacing: "-0.02em", color: "white", marginBottom: "16px", lineHeight: 1.1 }}>
+                            Siap merencanakan <span style={{ color: "#34d399" }}>trip impianmu?</span>
                         </h2>
-                        <p className="text-gray-400 text-base mb-10 leading-relaxed">
+                        <p style={{ color: "#9ca3af", fontSize: "1rem", marginBottom: "40px", lineHeight: 1.7 }}>
                             Biarkan AI CulTour merancang itinerary terbaik berdasarkan minat, budget, dan waktu Anda — gratis dan instan.
                         </p>
-                        <Link
-                            href="/planner"
-                            className="group inline-flex items-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black px-10 py-5 rounded-2xl text-base transition-all duration-200 shadow-xl shadow-emerald-900/40 active:scale-95"
+                        <Link href="/planner" style={{
+                            display: "inline-flex", alignItems: "center", gap: "10px",
+                            background: "#059669", color: "white", fontWeight: 800,
+                            padding: "18px 40px", borderRadius: "16px", fontSize: "15px",
+                            textDecoration: "none", boxShadow: "0 20px 40px rgba(5,150,105,0.3)",
+                            transition: "background 0.2s"
+                        }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "#10b981")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "#059669")}
                         >
-                            Generate Itinerary Sekarang
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                            Generate Itinerary Sekarang <ArrowRight size={18} />
                         </Link>
                     </div>
                 </motion.div>
             </section>
 
-            {/* ══ FOOTER ════════════════════════════════════════════ */}
-            <footer className="border-t border-white/5 px-6 py-10">
-                <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-5">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center font-black text-sm shadow-lg shadow-emerald-900/40">C</div>
-                        <span className="font-black text-sm tracking-tight">
-                            Cul<span className="text-emerald-500">Tour</span>
-                            <span className="text-gray-600 font-normal ml-1.5 text-xs">AI</span>
+            {/* ══ FOOTER ══ */}
+            <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "40px 24px" }}>
+                <div style={{
+                    maxWidth: "960px", margin: "0 auto",
+                    display: "flex", flexWrap: "wrap", justifyContent: "space-between",
+                    alignItems: "center", gap: "20px"
+                }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{
+                            width: "32px", height: "32px", background: "#059669", borderRadius: "10px",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontWeight: 900, fontSize: "14px"
+                        }}>C</div>
+                        <span style={{ fontWeight: 900, fontSize: "14px", letterSpacing: "-0.02em" }}>
+                            Cul<span style={{ color: "#10b981" }}>Tour</span>
+                            <span style={{ color: "#4b5563", fontWeight: 400, marginLeft: "6px", fontSize: "12px" }}>AI</span>
                         </span>
                     </div>
-                    <p className="text-gray-600 text-xs text-center">© 2025 CulTour AI · Wisata Budaya Danau Toba</p>
-                    <nav className="flex gap-6 text-xs text-gray-600">
+                    <p style={{ color: "#4b5563", fontSize: "12px" }}>© 2025 CulTour AI · Wisata Budaya Danau Toba</p>
+                    <nav style={{ display: "flex", gap: "24px" }}>
                         {[{ label: "Explore", href: "/explore" }, { label: "Planner", href: "/planner" }, { label: "Admin", href: "/admin" }].map((l) => (
-                            <Link key={l.href} href={l.href} className="hover:text-white transition-colors">{l.label}</Link>
+                            <Link key={l.href} href={l.href} style={{ color: "#4b5563", fontSize: "12px", textDecoration: "none", transition: "color 0.2s" }}
+                                onMouseEnter={e => (e.currentTarget.style.color = "white")}
+                                onMouseLeave={e => (e.currentTarget.style.color = "#4b5563")}
+                            >{l.label}</Link>
                         ))}
                     </nav>
                 </div>
