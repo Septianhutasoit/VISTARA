@@ -4,14 +4,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Home, Compass, CalendarDays, BookOpen,
+    Home, Compass, CalendarDays, BookOpen, MapPin,
     Bell, ChevronDown, LogOut, User, Settings,
     MessageCircle, Menu, X, Map,
 } from 'lucide-react';
 
+// ── Base URL backend — sama pola dengan ChatWidget, pakai env var di production ──
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 const NAV_ITEMS = [
     { name: 'Beranda', href: '/', icon: Home },
-    { name: 'Jelajahi', href: '/explore', icon: Compass },
+    { name: 'Jelajahi', href: '/explore', icon: Compass, hasDestDropdown: true },
     { name: 'Trip Planner', href: '/planner', icon: CalendarDays },
     { name: 'Culturepedia', href: '/culturepedia', icon: BookOpen },
 ];
@@ -21,14 +24,25 @@ const DEMO_NOTIFS = [
     { id: 2, title: '🎯 Trip Planner', desc: 'Jangan lupa selesaikan rencana akhir pekan Anda.', time: '5 jam lalu', dot: 'bg-blue-500' },
 ];
 
+// ── Fallback jika backend /destinations belum siap — ganti id dengan id asli kamu ──
+type PopularDestination = { id: string | number; name: string; kawasan?: string };
+const FALLBACK_DESTINATIONS: PopularDestination[] = [
+    { id: '1', name: 'Pulau Samosir', kawasan: 'Samosir' },
+    { id: '2', name: 'Air Terjun Efrata', kawasan: 'Tongging' },
+    { id: '3', name: 'Bukit Holbung', kawasan: 'Samosir' },
+    { id: '4', name: 'Lumban Silintong', kawasan: 'Balige' },
+];
+
 export default function Navbar() {
     const pathname = usePathname();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [isDestOpen, setIsDestOpen] = useState(false);
     const [notifs, setNotifs] = useState(DEMO_NOTIFS);
     const [logoutModal, setLogoutModal] = useState(false);
+    const [popularDest, setPopularDest] = useState<PopularDestination[]>(FALLBACK_DESTINATIONS);
     const notifRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -41,9 +55,27 @@ export default function Navbar() {
         setIsMobileOpen(false);
         setIsProfileOpen(false);
         setIsNotifOpen(false);
+        setIsDestOpen(false);
     }, [pathname]);
 
-    const closeAll = () => { setIsProfileOpen(false); setIsNotifOpen(false); };
+    // ── Ambil destinasi populer dari backend, fallback ke data statis jika gagal ──
+    useEffect(() => {
+        let active = true;
+        (async () => {
+            try {
+                const res = await fetch(`${API_URL}/destinations?limit=4`);
+                if (!res.ok) throw new Error('fetch failed');
+                const data = await res.json();
+                const list = Array.isArray(data) ? data : data.destinations || data.data || [];
+                if (active && list.length) setPopularDest(list.slice(0, 4));
+            } catch {
+                if (active) setPopularDest(FALLBACK_DESTINATIONS);
+            }
+        })();
+        return () => { active = false; };
+    }, []);
+
+    const closeAll = () => { setIsProfileOpen(false); setIsNotifOpen(false); setIsDestOpen(false); };
 
     const isActive = (href: string) =>
         href === '/' ? pathname === '/' : pathname.startsWith(href);
@@ -62,24 +94,12 @@ export default function Navbar() {
                 transition={{ duration: 0.5, ease: 'easeInOut' }}
                 className="fixed top-0 left-0 right-0 z-[100]"
             >
-                {/*
-                  ─────────────────────────────────────────────────────────────
-                  WRAPPER: inset kiri-kanan muncul saat scrolled
-                  Sebelum scroll : px-0  pt-0  → full width, rata tepi
-                  Setelah scroll : px-6  pt-4  → ada jarak kiri-kanan seperti gbr
-                  ─────────────────────────────────────────────────────────────
-                */}
                 <div>
-                    {/*
-                      Inner bar:
-                      Sebelum scroll : transparan, lebar penuh, padding dalam besar
-                      Setelah scroll : frosted pill mengambang, rounded-2xl, shadow
-                    */}
                     <div className={`flex items-center justify-between gap-4
                         transition-all duration-500 ease-in-out
                         ${isScrolled
-                        ? 'bg-black/50 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 border border-white/10 px-5 py-4'
-                        : 'bg-gradient-to-b from-black/30 to-transparent px-6 sm:px-10 py-12'
+                            ? 'bg-black/50 backdrop-blur-xl rounded-2xl shadow-2xl shadow-black/20 border border-white/10 px-5 py-4'
+                            : 'bg-gradient-to-b from-black/30 to-transparent px-6 sm:px-10 py-12'
                         }`}
                     >
 
@@ -111,9 +131,113 @@ export default function Navbar() {
 
                         {/* ── DESKTOP NAV ───────────────────────────────────── */}
                         <div className="hidden lg:flex items-center justify-center flex-1">
-                            <div className="flex items-center gap-12">
+                            <div className="flex items-center gap-10">
                                 {NAV_ITEMS.map(item => {
                                     const active = isActive(item.href);
+
+                                    // ── Item "Jelajahi": label tetap navigasi langsung, chevron buka dropdown destinasi populer ──
+                                    if (item.hasDestDropdown) {
+                                        return (
+                                            <div key={item.href} className="relative flex items-center gap-0.5">
+                                                <Link href={item.href}>
+                                                    <motion.div
+                                                        whileHover={{ scale: 1.04 }}
+                                                        whileTap={{ scale: 0.97 }}
+                                                        className={`relative flex items-center gap-2 pl-4 pr-1.5 py-2
+                                                            text-sm font-medium rounded-l-xl cursor-pointer
+                                                            transition-all duration-200
+                                                            ${active
+                                                                ? isScrolled ? 'text-[#5DCAA5]' : 'text-white font-semibold'
+                                                                : isScrolled
+                                                                    ? 'text-slate-300 hover:text-white hover:bg-white/10'
+                                                                    : 'text-white/80 hover:text-white hover:bg-white/10'
+                                                            }`}
+                                                    >
+                                                        <item.icon size={15} className="flex-shrink-0" />
+                                                        <span>{item.name}</span>
+                                                        {active && (
+                                                            <motion.div
+                                                                layoutId="cultour-active-nav"
+                                                                className={`absolute bottom-[-6px] left-2 right-2 h-[3px] rounded-full
+                                                                ${isScrolled ? 'bg-[#5DCAA5]' : 'bg-white'}`}
+                                                                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                                                            />
+                                                        )}
+                                                    </motion.div>
+                                                </Link>
+
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setIsDestOpen(p => !p);
+                                                        setIsProfileOpen(false);
+                                                        setIsNotifOpen(false);
+                                                    }}
+                                                    aria-label="Destinasi populer"
+                                                    className={`p-1.5 rounded-r-xl rounded-l-none transition-all
+                                                        ${isDestOpen
+                                                            ? 'text-[#5DCAA5] bg-white/10'
+                                                            : isScrolled
+                                                                ? 'text-slate-400 hover:text-white hover:bg-white/10'
+                                                                : 'text-white/60 hover:text-white hover:bg-white/10'
+                                                        }`}
+                                                >
+                                                    <ChevronDown
+                                                        size={13}
+                                                        className={`transition-transform duration-200 ${isDestOpen ? 'rotate-180' : ''}`}
+                                                    />
+                                                </button>
+
+                                                <AnimatePresence>
+                                                    {isDestOpen && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                                                            transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+                                                            className="absolute left-0 top-full mt-2 w-64 bg-[#121212]/95 backdrop-blur-xl
+                                                                border border-white/10 rounded-2xl shadow-2xl shadow-black/50
+                                                                overflow-hidden z-[110]"
+                                                        >
+                                                            <div className="px-4 py-3 border-b border-white/5 bg-white/5">
+                                                                <p className="text-xs font-black text-white uppercase tracking-widest">
+                                                                    Destinasi Populer
+                                                                </p>
+                                                            </div>
+                                                            <div className="p-1.5 space-y-0.5">
+                                                                {popularDest.map(d => (
+                                                                    <Link
+                                                                        key={d.id}
+                                                                        href={`/detail/${d.id}`}
+                                                                        onClick={() => setIsDestOpen(false)}
+                                                                    >
+                                                                        <button className="w-full px-3 py-2.5 text-left hover:bg-white/5 rounded-xl flex items-center gap-3 transition-all group">
+                                                                            <div className="w-7 h-7 bg-white/8 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-[#1D9E75]/20 transition-all">
+                                                                                <MapPin size={13} className="text-white/60 group-hover:text-[#5DCAA5] transition-colors" />
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className="text-[13px] font-semibold text-white leading-tight">{d.name}</p>
+                                                                                {d.kawasan && (
+                                                                                    <p className="text-[10px] text-white/40 mt-0.5">{d.kawasan}</p>
+                                                                                )}
+                                                                            </div>
+                                                                        </button>
+                                                                    </Link>
+                                                                ))}
+                                                            </div>
+                                                            <Link href="/explore" onClick={() => setIsDestOpen(false)}>
+                                                                <div className="px-4 py-3 border-t border-white/5 text-center text-[11px] font-bold text-[#5DCAA5] hover:bg-white/5 transition-colors">
+                                                                    Lihat Semua Destinasi →
+                                                                </div>
+                                                            </Link>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        );
+                                    }
+
+                                    // ── Item nav biasa (Beranda, Trip Planner, Culturepedia) ──
                                     return (
                                         <Link key={item.href} href={item.href}>
                                             <motion.div
@@ -154,7 +278,7 @@ export default function Navbar() {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    onClick={() => { setIsNotifOpen(p => !p); setIsProfileOpen(false); }}
+                                    onClick={() => { setIsNotifOpen(p => !p); setIsProfileOpen(false); setIsDestOpen(false); }}
                                     className={`relative p-2 rounded-xl transition-all z-50
                                         ${isNotifOpen
                                             ? 'text-[#5DCAA5] bg-white/10'
@@ -232,7 +356,7 @@ export default function Navbar() {
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    onClick={() => { setIsProfileOpen(p => !p); setIsNotifOpen(false); }}
+                                    onClick={() => { setIsProfileOpen(p => !p); setIsNotifOpen(false); setIsDestOpen(false); }}
                                     className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full
                                         transition-all duration-300
                                         bg-white/10 border border-white/20 hover:bg-white/20"
@@ -364,6 +488,24 @@ export default function Navbar() {
                                                 </span>
                                                 {active && <div className="w-1.5 h-1.5 rounded-full bg-current" />}
                                             </Link>
+
+                                            {/* ── Shortcut destinasi populer di bawah "Jelajahi" pada mobile ── */}
+                                            {item.hasDestDropdown && (
+                                                <div className="ml-9 mt-1 mb-2 space-y-0.5">
+                                                    {popularDest.slice(0, 3).map(d => (
+                                                        <Link
+                                                            key={d.id}
+                                                            href={`/detail/${d.id}`}
+                                                            onClick={() => setIsMobileOpen(false)}
+                                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all
+                                                                ${isScrolled ? 'text-white/50 hover:text-white hover:bg-white/6' : 'text-slate-500 hover:bg-slate-50'}`}
+                                                        >
+                                                            <MapPin size={12} className="flex-shrink-0" />
+                                                            {d.name}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </motion.div>
                                     );
                                 })}
@@ -383,7 +525,7 @@ export default function Navbar() {
             </motion.nav>
 
             {/* Backdrop */}
-            {(isProfileOpen || isNotifOpen) && (
+            {(isProfileOpen || isNotifOpen || isDestOpen) && (
                 <div className="fixed inset-0 z-[90]" onClick={closeAll} />
             )}
 

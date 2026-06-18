@@ -10,6 +10,9 @@ interface Message {
     content: string;
 }
 
+// ── Base URL backend — pakai env var di production, fallback localhost saat dev ──
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
@@ -18,10 +21,26 @@ export default function ChatWidget() {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+
+    // ── Auto-focus input setiap kali widget dibuka ──
+    useEffect(() => {
+        if (isOpen) inputRef.current?.focus();
+    }, [isOpen]);
+
+    // ── Tutup widget dengan tombol Escape ──
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setIsOpen(false);
+        };
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [isOpen]);
 
     const sendMessage = async () => {
         if (!input.trim() || isLoading) return;
@@ -32,7 +51,7 @@ export default function ChatWidget() {
         setIsLoading(true);
 
         try {
-            const res = await fetch("http://localhost:8000/api/v1/chat", {
+            const res = await fetch(`${API_URL}/api/v1/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: userMsg.content }),
@@ -61,26 +80,44 @@ export default function ChatWidget() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.92, y: 16 }}
                         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        role="dialog"
+                        aria-label="CulTour AI Guide"
                         className="fixed bottom-24 right-5 z-[200] w-[340px] sm:w-[380px] rounded-2xl border border-white/10 bg-[#0e1210] shadow-2xl shadow-black/60 overflow-hidden flex flex-col"
                         style={{ maxHeight: "520px" }}
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-5 py-4 border-b border-white/8 bg-[#111814]">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-900/40">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-900/40 shrink-0">
                                     <Bot size={16} className="text-white" />
                                 </div>
-                                <div>
-                                    <p className="text-sm font-black tracking-tight text-white">CulTour AI Guide</p>
+                                <div className="min-w-0">
+                                    <p className="text-sm font-black tracking-tight text-white truncate">CulTour AI Guide</p>
                                     <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">Online</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
-                            >
-                                <X size={15} className="text-gray-400" />
-                            </button>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                {/* ── Buka penuh: arahkan ke halaman /ai untuk versi full-screen ── */}
+                                <Link
+                                    href="/ai"
+                                    onClick={() => setIsOpen(false)}
+                                    aria-label="Buka mode layar penuh"
+                                    className="hidden sm:flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-bold
+                                        text-emerald-400 hover:text-emerald-300 hover:bg-white/5 transition-colors"
+                                >
+                                    <Sparkles size={11} />
+                                    Buka penuh ↗
+                                </Link>
+
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    aria-label="Tutup chat"
+                                    className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                                >
+                                    <X size={15} className="text-gray-400" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Messages */}
@@ -89,8 +126,8 @@ export default function ChatWidget() {
                                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                                     <div
                                         className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${msg.role === "user"
-                                                ? "bg-emerald-600 text-white rounded-br-sm"
-                                                : "bg-white/5 border border-white/8 text-gray-200 rounded-bl-sm"
+                                            ? "bg-emerald-600 text-white rounded-br-sm"
+                                            : "bg-white/5 border border-white/8 text-gray-200 rounded-bl-sm"
                                             }`}
                                     >
                                         {msg.content}
@@ -111,16 +148,20 @@ export default function ChatWidget() {
                         <div className="px-4 py-3 border-t border-white/8 bg-[#111814]">
                             <div className="flex items-center gap-2">
                                 <input
+                                    ref={inputRef}
                                     type="text"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                                     placeholder="Tanyakan sesuatu..."
-                                    className="flex-1 bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm px-4 py-2.5 rounded-xl outline-none focus:border-emerald-500/40 transition-colors"
+                                    disabled={isLoading}
+                                    aria-label="Tulis pesan"
+                                    className="flex-1 bg-white/5 border border-white/10 text-white placeholder-gray-600 text-sm px-4 py-2.5 rounded-xl outline-none focus:border-emerald-500/40 transition-colors disabled:opacity-50"
                                 />
                                 <button
                                     onClick={sendMessage}
                                     disabled={!input.trim() || isLoading}
+                                    aria-label="Kirim pesan"
                                     className="w-9 h-9 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl flex items-center justify-center transition-colors shrink-0"
                                 >
                                     <Send size={14} className="text-white" />
@@ -136,6 +177,7 @@ export default function ChatWidget() {
                 onClick={() => setIsOpen((prev) => !prev)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                aria-label={isOpen ? "Tutup chat AI Guide" : "Buka chat AI Guide"}
                 className="fixed bottom-5 right-5 z-[200] w-14 h-14 bg-emerald-600 hover:bg-emerald-500 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-900/50 transition-colors"
             >
                 <AnimatePresence mode="wait">
