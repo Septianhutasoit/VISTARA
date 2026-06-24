@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.api.vision import vision_manager
+from app.ai.vision import vision_manager
 import io
 
 

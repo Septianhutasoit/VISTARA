@@ -27,7 +27,10 @@ app.include_router(search.router, prefix="/api/v1", tags=["Intelligence Search"]
 @app.on_event("startup")
 async def startup_event():
     # Load dataset visual
-    vision_manager.train_samples()
-    print("🚀 Vistara Lens Intelligence Active")
+    try:
+        vision_manager.train_samples()
+        print("🚀 Vistara Lens: Dataset visual berhasil dipelajari.")
+    except Exception as e:
+        print(f"⚠️ Vistara Lens Warning: {e}")
 
 app.include_router(vision.router, prefix="/api/v1/vision", tags=["Visual Discovery"])
